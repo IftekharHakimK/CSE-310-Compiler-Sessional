@@ -1,0 +1,77 @@
+ABS PROC  
+   PUSH AX
+   CMP DX, 0
+   JGE ABS_LAST
+   MOV AX, 0
+   SUB AX, DX
+   MOV DX, AX  
+   ABS_LAST:
+   POP AX
+   RET
+ABS ENDP
+
+DIVIDE PROC  
+    PUSH BX
+    CWD
+    IDIV BX
+    POP BX
+    RET
+DIVIDE ENDP
+
+PRINT PROC 
+    PUSH AX
+    PUSH BX 
+    PUSH CX 
+    PUSH DX
+    PUSH BP
+    
+    MOV BP, SP
+    MOV AX, WORD PTR[BP+12] 
+    
+    TEST AX,8000H
+    JZ PROCESS
+    MOV CX, AX ;Temporarily storing
+    MOV AH, 2
+    MOV DL, '-'
+    INT 21H
+    MOV AX, CX
+    
+    ;NEG AX
+    
+    PROCESS:
+    MOV CX, 0
+    WHILE:
+       MOV BX, 10
+       CALL DIVIDE  
+       
+       CALL ABS
+       
+       PUSH DX 
+       INC CX
+       CMP AX, 0
+       JNE WHILE 
+    MOV AH, 2 
+    
+    TOP:
+        POP BX
+        MOV DL, BL
+        ADD DL, '0'
+        INT 21H 
+        DEC CX
+        CMP CX, 0
+        JG TOP
+    PRINT_LAST:
+    MOV AH, 2
+    MOV DL, 0DH
+    INT 21H
+    MOV AH, 2
+    MOV DL, 0AH
+    INT 21H 
+    POP BP
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    
+    RET    
+PRINT ENDP
